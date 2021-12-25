@@ -2,15 +2,104 @@
 title: "Predicting Breast Cancer"
 author: "Francis Osei"
 date: "17/12/2021"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE,message = FALSE)
+```
+
+```{r }
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(GGally)
+library(ggbeeswarm)
 ```
 
 
-```{r Packages}
-renv
+```{r,include=F}
+cancer <- readr::read_csv("https://raw.githubusercontent.com/Franosei/Data-Visualization-project/main/Data/Breast%20cancer.csv")
+cancer$id <- as.numeric(factor(cancer$id, 
+                  levels=unique(cancer$id)))
+glimpse(cancer)
+```
+
+
+
+```{r, include=F}
+cancer_norm <- cancer
+cancer_norm[3:32] <- scale(cancer_norm[3:32])
+```
+
+
+```{r}
+cancer_norm %>% 
+  pivot_longer(cols = c(3:12), names_to = "variables") %>% 
+  ggplot(aes(x = variables,y=value,colour = diagnosis))+
+  geom_quasirandom(alpha = 1,method = "smiley",dodge.width = 1)+
+  scale_color_brewer(palette = "Set1")+
+  theme(axis.text.x = element_text(angle = 45, hjust=1))+ theme(axis.title.x = element_blank())+
+  labs(title = "Swarm Plot for the First Ten Nucleus features")
+  #+ scale_x_discrete(label=abbreviate)
+
+```
+
+```{r}
+cancer_norm %>% 
+  pivot_longer(cols = c(13:22), names_to = "variables") %>% 
+  ggplot(aes(x = variables,y=value,colour = diagnosis))+
+  geom_quasirandom(alpha = 1,method = "smiley",dodge.width = 1)+
+  scale_color_brewer(palette = "Set1")+
+  theme(axis.text.x = element_text(angle = 45, hjust=1))+ theme(axis.title.x = element_blank())+
+  labs(title = "Swarm Plot for the Middle Ten Nucleus features")
+```
+
+
+
+```{r}
+cancer_norm %>% 
+  pivot_longer(cols = c(23:32), names_to = "variables") %>% 
+  ggplot(aes(x = variables,y=value,colour = diagnosis))+
+  geom_quasirandom(alpha = 1,method = "smiley",dodge.width = 1)+
+  scale_color_brewer(palette = "Set1")+
+  theme(axis.text.x = element_text(angle = 45, hjust=1))+ theme(axis.title.x = element_blank())+
+  labs(title = "Swarm Plot for the Last Ten Nucleus features")
+```
+
+Some plots shows clear differentiation between the Malignant and Bening cell whiles others are very difficult to distinguish. We tried to use different plot to see if we can get a clear picture of the the difference between Bening and Malignant.
+```{r}
+data_long <- cancer %>% 
+  pivot_longer(cols = contains(c("smoothness","symmetry","fractal","concavity")), names_to = "variables") 
+data_long %>% 
+  ggplot(aes(y=value,fill = diagnosis))+
+  geom_histogram(alpha = 4, position = "identity")+
+  facet_wrap(~variables, scale = "free", ncol = 3)+
+  coord_flip()+
+  theme(axis.title.x = element_blank())+
+  labs(title = "Difficult  Nucleus features to Differentiate among Diagnosis")
+```
+
+
+```{r}
+library(ggforce)
+cancer_norm %>%
+  ggplot(aes(x=symmetry_mean,y = radius_mean))+
+  geom_mark_ellipse(aes(fill = diagnosis,
+                        label = diagnosis),
+                    expand = unit(0.08,"mm"),
+                    label.buffer = unit(-2,"mm"))+
+  geom_point(aes(color = diagnosis))+
+  theme(legend.position = "none")
+```
+```{r}
+cancer_norm %>% 
+  ggplot()+
+  geom_point(aes(x=symmetry_mean,y = radius_mean,colour = diagnosis),size = 2)+
+  stat_ellipse(aes(x=symmetry_mean,y = radius_mean,colour = diagnosis),alpha = 2,type = "norm")+
+  scale_color_viridis_d() + 
+  guides(colour = "legend")
 ```
 
