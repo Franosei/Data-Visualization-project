@@ -1,0 +1,174 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Predicting Breast Cancer},
+  pdfauthor={Francis Osei},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\title{Predicting Breast Cancer}
+\author{Francis Osei}
+\date{17/12/2021}
+
+\begin{document}
+\maketitle
+
+In this project we are going to explore the breast cancer data from the
+UCI Machine learning repository
+(\url{https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Wisconsin+(Diagnostic)}).
+The figure below shows the the overall visualization process of our
+data.
+
+\includegraphics{Final_project_files/figure-latex/unnamed-chunk-2-1.pdf}
+
+\begin{verbatim}
+## Rows: 569
+## Columns: 32
+## $ id                      <dbl> 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,~
+## $ diagnosis               <chr> "M", "M", "M", "M", "M", "M", "M", "M", "M", "~
+## $ radius_mean             <dbl> 17.990, 20.570, 19.690, 11.420, 20.290, 12.450~
+## $ texture_mean            <dbl> 10.38, 17.77, 21.25, 20.38, 14.34, 15.70, 19.9~
+## $ perimeter_mean          <dbl> 122.80, 132.90, 130.00, 77.58, 135.10, 82.57, ~
+## $ area_mean               <dbl> 1001.0, 1326.0, 1203.0, 386.1, 1297.0, 477.1, ~
+## $ smoothness_mean         <dbl> 0.11840, 0.08474, 0.10960, 0.14250, 0.10030, 0~
+## $ compactness_mean        <dbl> 0.27760, 0.07864, 0.15990, 0.28390, 0.13280, 0~
+## $ concavity_mean          <dbl> 0.30010, 0.08690, 0.19740, 0.24140, 0.19800, 0~
+## $ `concave points_mean`   <dbl> 0.14710, 0.07017, 0.12790, 0.10520, 0.10430, 0~
+## $ symmetry_mean           <dbl> 0.2419, 0.1812, 0.2069, 0.2597, 0.1809, 0.2087~
+## $ fractal_dimension_mean  <dbl> 0.07871, 0.05667, 0.05999, 0.09744, 0.05883, 0~
+## $ radius_se               <dbl> 1.0950, 0.5435, 0.7456, 0.4956, 0.7572, 0.3345~
+## $ texture_se              <dbl> 0.9053, 0.7339, 0.7869, 1.1560, 0.7813, 0.8902~
+## $ perimeter_se            <dbl> 8.589, 3.398, 4.585, 3.445, 5.438, 2.217, 3.18~
+## $ area_se                 <dbl> 153.40, 74.08, 94.03, 27.23, 94.44, 27.19, 53.~
+## $ smoothness_se           <dbl> 0.006399, 0.005225, 0.006150, 0.009110, 0.0114~
+## $ compactness_se          <dbl> 0.049040, 0.013080, 0.040060, 0.074580, 0.0246~
+## $ concavity_se            <dbl> 0.05373, 0.01860, 0.03832, 0.05661, 0.05688, 0~
+## $ `concave points_se`     <dbl> 0.015870, 0.013400, 0.020580, 0.018670, 0.0188~
+## $ symmetry_se             <dbl> 0.03003, 0.01389, 0.02250, 0.05963, 0.01756, 0~
+## $ fractal_dimension_se    <dbl> 0.006193, 0.003532, 0.004571, 0.009208, 0.0051~
+## $ radius_worst            <dbl> 25.38, 24.99, 23.57, 14.91, 22.54, 15.47, 22.8~
+## $ texture_worst           <dbl> 17.33, 23.41, 25.53, 26.50, 16.67, 23.75, 27.6~
+## $ perimeter_worst         <dbl> 184.60, 158.80, 152.50, 98.87, 152.20, 103.40,~
+## $ area_worst              <dbl> 2019.0, 1956.0, 1709.0, 567.7, 1575.0, 741.6, ~
+## $ smoothness_worst        <dbl> 0.1622, 0.1238, 0.1444, 0.2098, 0.1374, 0.1791~
+## $ compactness_worst       <dbl> 0.6656, 0.1866, 0.4245, 0.8663, 0.2050, 0.5249~
+## $ concavity_worst         <dbl> 0.71190, 0.24160, 0.45040, 0.68690, 0.40000, 0~
+## $ `concave points_worst`  <dbl> 0.26540, 0.18600, 0.24300, 0.25750, 0.16250, 0~
+## $ symmetry_worst          <dbl> 0.4601, 0.2750, 0.3613, 0.6638, 0.2364, 0.3985~
+## $ fractal_dimension_worst <dbl> 0.11890, 0.08902, 0.08758, 0.17300, 0.07678, 0~
+\end{verbatim}
+
+Figure 2 shows all the features (Attributes) of our data. Each feature
+has either mean, Standard error (se) and worst. This gives us a clear
+idea of the features we are working with.
+
+\includegraphics{Final_project_files/figure-latex/unnamed-chunk-5-1.pdf}
+
+The correlation plot uses the pearson correlation to the direction and
+strength of the relation of our features. This helps to reduce the
+number of features in our data. Here we represented the correlation in
+form of heatmap showing the range of values using colours. This
+visualization is important especially when dooing regression analysis.
+
+\includegraphics{Final_project_files/figure-latex/unnamed-chunk-6-1.pdf}
+
+\section{Beeswarm plots}
+
+The beeswarm is a techique to avoid overplotting. This randomly move
+data points away from each other.\textbackslash{} We plotted a
+quasirandom beeswarm to distinguished between Begign and Malignant. For
+each plot we have 10 features. The are some features that are difficult
+to differentiate between Begign and Malignant.
+\includegraphics{Final_project_files/figure-latex/unnamed-chunk-7-1.pdf}
+
+\includegraphics{Final_project_files/figure-latex/unnamed-chunk-8-1.pdf}
+
+\includegraphics{Final_project_files/figure-latex/unnamed-chunk-9-1.pdf}
+
+\section{Histogram}
+
+Some plots shows clear differentiation between the Malignant and Bening
+cell whiles others are very difficult to distinguish. We tried to use
+different plot to see if we can get a clear picture of the the
+difference between Bening and Malignant. In the histogram plot, the
+observation in each bin is represented by the height of the bar. In this
+plot, the variance for some features can be seen more clearly interns of
+Diagnosis.
+\includegraphics{Final_project_files/figure-latex/unnamed-chunk-10-1.pdf}
+
+\section{Scatter plot with individual ellipse}
+
+The scatter plot uses dots to represent two different numerical
+features. The scatter plots shows the relationship between variable
+(mean,standard error, and worst).\textbackslash{} For classification
+purpose, we define the region that contains 95\% of the samples for each
+diagnosis. The individual ellipse provides us with some interesting
+difference between the diagnosis. \bullet The two ellipse are
+overlapping and parallel. \bullet The two ellipse are overlapping and
+perpendicular. \bullet The two ellipse are non overlapping and parallel.
+\bullet The two ellipse are non overlapping and perpendicular.
+
+\includegraphics{Final_project_files/figure-latex/unnamed-chunk-12-1.pdf}
+
+\includegraphics{Final_project_files/figure-latex/unnamed-chunk-14-1.pdf}
+
+\includegraphics{Final_project_files/figure-latex/unnamed-chunk-16-1.pdf}
+
+\end{document}
