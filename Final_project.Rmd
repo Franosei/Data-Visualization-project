@@ -1,5 +1,5 @@
 ---
-title: "Predicting Breast Cancer"
+title: "Data Visualization of Breast Cancer"
 author: "Francis Osei"
 date: "17/12/2021"
 output:
@@ -24,6 +24,9 @@ library(reshape2)
 ```
 
 In this project we are going to explore the breast cancer data from the UCI Machine learning repository (https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Wisconsin+(Diagnostic)).
+
+# 1. Outline of the Project
+
 The figure below shows the the overall visualization process of our data.
 
 ```{r}
@@ -92,7 +95,7 @@ data %>%
   theme_void()
 ```
 
-```{r,include=T}
+```{r,include=F}
 cancer <- readr::read_csv("https://raw.githubusercontent.com/Franosei/Data-Visualization-project/main/Data/Breast%20cancer.csv")
 cancer$id <- as.numeric(factor(cancer$id, 
                   levels=unique(cancer$id)))
@@ -104,6 +107,7 @@ library(data.table)
 cancer_norm <- cancer
 cancer_norm[3:32] <- scale(cancer_norm[3:32])
 ```
+# 2. Exploring the features of Breast Cancer Data
 
 Figure 2 shows all the features (Attributes) of our data. Each feature has either mean, Standard error (se) and worst. This gives us a clear idea of the features we are working with.
 
@@ -169,7 +173,12 @@ data %>%
    theme_void()
 ```
 
-The correlation plot uses the pearson correlation to the direction and strength of the relation of our features. This helps to reduce the number of features in our data. Here we represented the correlation in form of heatmap showing the range of values using colours. This visualization is important especially when dooing regression analysis.
+# 3. Data Visualization
+In this section we will provide a graphical representation of our data. This part provides an accessible way to understand the patterns,outliers and trends in breast cancer data.
+
+## 3.1.  Heatmap (Correlation Plot)
+
+The correlation plot uses the pearson correlation to show the direction and strength of the relation of our features. This helps to reduce the number of features in our data. Here we represented the correlation in form of heatmap showing the range of values using colours. This visualization is important especially when doing regression analysis.
 
 ```{r}
 cancer_cor <- round(cor(cancer[3:32]),1)
@@ -181,16 +190,18 @@ melt_cor %>%
   scale_x_discrete(label=abbreviate)+
   scale_y_discrete(label=abbreviate)+
   theme(axis.title.x = element_blank(),
-          axis.title.y = element_blank())+
+          axis.title.y = element_blank(),axis.text.x = element_text(angle = 45, hjust=1))+
   labs(caption = "figure 3: Heatmap (correlation")+
   theme(plot.caption = element_text(hjust = 0.5)
-  )
-#+
-  #geom_text(aes(Var2, Var1, label = value), color = "black", size = 4)
+  )+
+  geom_text(aes(Var2, Var1, label = value), color = "black", size = 2,alpha=0.7 )
 ```
-\section{Beeswarm plots}
-The beeswarm is a techique to avoid overplotting. This randomly move data points away from each other.\\
-We plotted a quasirandom beeswarm to distinguished between Begign and Malignant. For each plot we have 10 features. The are some features that are difficult to differentiate between Begign and Malignant. 
+
+## 3.2. The Beeswarm plot (Quasirandom)
+
+The beeswarm is a techique to avoid overplotting. This randomly move data points away from each other.
+We plotted a quasirandom beeswarm to distinguished between Begign and Malignant. For each plot we have 10 features. The are some features that are difficult to differentiate between Begign and Malignant. This techniques provides a visible and easy to interpret since each data point do not overlap.
+
 ```{r}
 cancer_norm %>% 
   pivot_longer(cols = c(3:12), names_to = "variables") %>% 
@@ -230,8 +241,11 @@ cancer_norm %>%
   )
 
 ```
-\section{Histogram}
+
+## 3.3. The Histogram 
+
 Some plots shows clear differentiation between the Malignant and Bening cell whiles others are very difficult to distinguish. We tried to use different plot to see if we can get a clear picture of the the difference between Bening and Malignant. In the histogram plot, the observation in each bin is represented by the height of the bar. In this plot, the variance for some features can be seen more clearly interns of Diagnosis.
+
 ```{r}
 data_long <- cancer %>% 
   pivot_longer(cols = contains(c("smoothness","symmetry","fractal","concavity")), names_to = "variables") 
@@ -244,44 +258,53 @@ data_long %>%
   labs(caption = "fig 7: Difficult features to Differentiate among Diagnosis")+
   theme(plot.caption = element_text(hjust = 0.5))
 ```
-\section{Scatter plot with individual ellipse}
-The scatter plot uses dots to represent two different numerical features. The scatter plots shows the relationship between variable (mean,standard error, and worst).\\
+
+## 3.4. Scatter plot with individual ellipse
+
+The scatter plot uses dots to represent two different numerical features. The scatter plots shows the relationship between variable (mean,standard error, and worst).
+
 For classification purpose, we define the region that contains 95% of the samples for each diagnosis. The individual ellipse provides us with some interesting difference between the diagnosis.
-\bullet The two ellipse are overlapping and parallel.
-\bullet The two ellipse are overlapping and perpendicular.
-\bullet The two ellipse are non overlapping and parallel.
-\bullet The two ellipse are non overlapping and perpendicular.
+ - The two ellipse are overlapping and parallel.
+ - The two ellipse are overlapping and perpendicular.
+ - The two ellipse are non overlapping and parallel.
+ - The two ellipse are non overlapping and perpendicular.
+ 
 ```{r}
 p1 <- cancer %>% 
   ggplot(aes(x=symmetry_mean,y = radius_mean,colour = diagnosis)) +
   geom_point(size = 3) +
-  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.4,type = "norm") +
+  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.1,type = "norm") +
+  scale_color_manual(values = c("darkorange","cyan4")) +
   guides(colour = "legend")
 p2 <- cancer %>% 
   ggplot(aes(x=smoothness_mean,y = radius_mean,colour = diagnosis)) +
   geom_point(size = 3) +
-  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.4,type = "norm") +
+  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.1,type = "norm") +
+  scale_color_manual(values = c("darkorange","cyan4")) +
   guides(colour = "legend")
 p3 <- cancer %>% 
   ggplot(aes(x=concavity_mean,y = radius_mean,colour = diagnosis)) +
   geom_point(size = 3) +
-  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.4,type = "norm") +
+  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.1,type = "norm") +
+  scale_color_manual(values = c("darkorange","cyan4")) +
   guides(colour = "legend")
 p4 <- cancer %>% 
   ggplot(aes(x=fractal_dimension_mean,y = radius_mean,colour = diagnosis)) +
   geom_point(size = 3) +
-  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.4,type = "norm") +
+  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.1,type = "norm") +
+  scale_color_manual(values = c("darkorange","cyan4")) +
   guides(colour = "legend")
 p5 <- cancer %>% 
   ggplot(aes(x=texture_mean,y = radius_mean,colour = diagnosis)) +
   geom_point(size = 3) +
-  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.4,type = "norm") +
+  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.1,type = "norm") +
+  scale_color_manual(values = c("darkorange","cyan4")) +
   guides(colour = "legend")
-
 p6 <- cancer %>% 
   ggplot(aes(x=compactness_mean,y = radius_mean,colour = diagnosis)) +
   geom_point(size = 3) +
-  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.4,type = "norm") +
+  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.1,type = "norm") +
+  scale_color_manual(values = c("darkorange","cyan4")) +
   guides(colour = "legend")
 ```
 
@@ -298,32 +321,38 @@ ggdraw(add_sub(plot_row, "fig 8: 95% confidence region for mean features"))
 s1 <- cancer %>% 
   ggplot(aes(x=symmetry_se,y = radius_se,colour = diagnosis)) +
   geom_point(size = 3) +
-  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.4,type = "norm") +
+  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.1,type = "norm") +
+  scale_color_manual(values = c("darkorange","cyan4"))+
   guides(colour = "legend")
 s2 <- cancer %>% 
   ggplot(aes(x=smoothness_se,y = radius_se,colour = diagnosis)) +
   geom_point(size = 3) +
-  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.4,type = "norm") +
+  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.1,type = "norm") +
+  scale_color_manual(values = c("darkorange","cyan4"))+
   guides(colour = "legend")
 s3 <- cancer %>% 
   ggplot(aes(x=concavity_se,y = radius_se,colour = diagnosis)) +
   geom_point(size = 3) +
-  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.4,type = "norm") +
+  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.1,type = "norm") +
+  scale_color_manual(values = c("darkorange","cyan4"))+
   guides(colour = "legend")
 s4 <- cancer %>% 
   ggplot(aes(x=fractal_dimension_se,y = radius_se,colour = diagnosis)) +
   geom_point(size = 3) +
-  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.4,type = "norm") +
+  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.1,type = "norm") +
+  scale_color_manual(values = c("darkorange","cyan4"))+
   guides(colour = "legend")
 s5 <- cancer %>% 
   ggplot(aes(x=texture_se,y = radius_se,colour = diagnosis)) +
   geom_point(size = 3) +
-  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.4,type = "norm") +
+  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.1,type = "norm") +
+  scale_color_manual(values = c("darkorange","cyan4"))+
   guides(colour = "legend")
 s6 <- cancer %>% 
   ggplot(aes(x=compactness_se,y = radius_se,colour = diagnosis)) +
   geom_point(size = 3) +
-  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.4,type = "norm") +
+  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.1,type = "norm") +
+  scale_color_manual(values = c("darkorange","cyan4"))+
   guides(colour = "legend")
 ```
 
@@ -332,7 +361,7 @@ s6 <- cancer %>%
 combined_plot <- plot_grid(s1 + theme(legend.position = "none"), 
           s2 + theme(legend.position = "none"),s3 + theme(legend.position = "none"),s4 + theme(legend.position = "none"),s5 + theme(legend.position = "none"),s6 + theme(legend.position = "none"),
           labels = c('A', 'B','C','D','E','F'), label_size = 12)
-legend <- get_legend(p2 + guides(color = guide_legend(nrow = 1)) +
+legend <- get_legend(s2 + guides(color = guide_legend(nrow = 1)) +
     theme(legend.position = "bottom"))
 plot_row <- plot_grid(combined_plot, legend, ncol = 1, rel_heights = c(1, .1) )
 ggdraw(add_sub(plot_row, "fig 9: 95% confidence region for se features"))
@@ -341,32 +370,38 @@ ggdraw(add_sub(plot_row, "fig 9: 95% confidence region for se features"))
 w1 <- cancer %>% 
   ggplot(aes(x=symmetry_worst,y = radius_worst,colour = diagnosis)) +
   geom_point(size = 3) +
-  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.4,type = "norm") +
+  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.1,type = "norm") +
+  scale_color_manual(values = c("darkorange","cyan4"))+
   guides(colour = "legend")
 w2 <- cancer %>% 
   ggplot(aes(x=smoothness_worst,y = radius_worst,colour = diagnosis)) +
   geom_point(size = 3) +
-  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.4,type = "norm") +
+  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.1,type = "norm") +
+  scale_color_manual(values = c("darkorange","cyan4"))+
   guides(colour = "legend")
 w3 <- cancer %>% 
   ggplot(aes(x=concavity_worst,y = radius_worst,colour = diagnosis)) +
   geom_point(size = 3) +
-  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.4,type = "norm") +
+  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.1,type = "norm") +
+  scale_color_manual(values = c("darkorange","cyan4"))+
   guides(colour = "legend")
 w4 <- cancer %>% 
   ggplot(aes(x=fractal_dimension_worst,y = radius_worst,colour = diagnosis)) +
   geom_point(size = 3) +
-  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.4,type = "norm") +
+  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.1,type = "norm") +
+  scale_color_manual(values = c("darkorange","cyan4"))+
   guides(colour = "legend")
 w5 <- cancer %>% 
   ggplot(aes(x=texture_worst,y = radius_worst,colour = diagnosis)) +
   geom_point(size = 3) +
-  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.4,type = "norm") +
+  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.1,type = "norm") +
+  scale_color_manual(values = c("darkorange","cyan4"))+
   guides(colour = "legend")
 w6 <- cancer %>% 
   ggplot(aes(x=compactness_worst,y = radius_worst,colour = diagnosis)) +
   geom_point(size = 3) +
-  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.4,type = "norm") +
+  stat_ellipse(aes(fill = diagnosis), geom="polygon",level=0.95,alpha=0.1,type = "norm") +
+  scale_color_manual(values = c("darkorange","cyan4"))+
   guides(colour = "legend")
 ```
 
@@ -374,9 +409,18 @@ w6 <- cancer %>%
 combined_plot <- plot_grid(w1 + theme(legend.position = "none"), 
           w2 + theme(legend.position = "none"),w3 + theme(legend.position = "none"),w4 + theme(legend.position = "none"),w5 + theme(legend.position = "none"),w6 + theme(legend.position = "none"),
           labels = c('A', 'B','C','D','E','F'), label_size = 12)
-legend <- get_legend(p2 + guides(color = guide_legend(nrow = 1)) +
+legend <- get_legend(w2 + guides(color = guide_legend(nrow = 1)) +
     theme(legend.position = "bottom"))
 plot_row <- plot_grid(combined_plot, legend, ncol = 1, rel_heights = c(1, .1) )
 ggdraw(add_sub(plot_row, "fig 10: 95% confidence region for worst features"))
+```
+
+```{r}
+cancer %>% 
+  ggplot(aes(x=compactness_worst,y = radius_worst,colour = diagnosis)) +
+  geom_point(size = 3) +
+  stat_ellipse(aes(fill = diagnosis,color = diagnosis), geom="polygon",level=0.95,alpha=0,type = "norm", linetype = 2,beta=0.5)+
+  scale_color_manual(values = c("darkorange","cyan4"))
+  
 ```
 
